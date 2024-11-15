@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\AccessRights.h"
-#include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\User.h"
-#include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Document.h"
-
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/Administrator.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/User.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/Document.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/AccessRights.h"
 
 class MockUser : public User {
 public:
@@ -16,52 +16,68 @@ public:
         : Document(id, title, content, creationDate) {}
 };
 
-TEST(AccessRightsTest, CheckAccess_AdminLevel) {
-    MockUser user(1, "Alice", "alice@example.com", "password123");
-    MockDocument document(1, "Project Plan", "Content of the project plan.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "admin");
+class AccessRightsTest : public ::testing::Test {
+protected:
+    MockUser* user;
+    MockDocument* document;
+    AccessRights* accessRights;
 
-    EXPECT_TRUE(accessRights.checkAccess());
+    void SetUp() override {
+        user = new MockUser(1, "John Doe", "john@example.com", "password123");
+        document = new MockDocument(1, "Test Document", "This is a test document.", "2024-01-01");
+        accessRights = new AccessRights(user, document, "read");     }
+
+    void TearDown() override {
+        delete accessRights;
+        delete document;
+        delete user;
+    }
+};
+
+TEST_F(AccessRightsTest, CheckAccessReturnsTrue) {
+    EXPECT_TRUE(accessRights->checkAccess());
 }
 
-TEST(AccessRightsTest, CheckAccess_WriteLevel) {
-    MockUser user(2, "Bob", "bob@example.com", "password456");
-    MockDocument document(2, "Draft Document", "Draft content.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "write");
-
-    EXPECT_TRUE(accessRights.checkAccess());
+TEST_F(AccessRightsTest, AssignAccessChangesAccessLevel) {
+    accessRights->assignAccess("write");
+    EXPECT_EQ(accessRights->getAccessLevel(), "write");
 }
 
-TEST(AccessRightsTest, CheckAccess_ReadLevel) {
-    MockUser user(3, "Charlie", "charlie@example.com", "password789");
-    MockDocument document(3, "Confidential Report", "Confidential content.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "read");
-
-    EXPECT_TRUE(accessRights.checkAccess());
+TEST_F(AccessRightsTest, GetUserReturnsCorrectUser) {
+    EXPECT_EQ(accessRights->getUser()->getName(), "John Doe");
 }
 
-TEST(AccessRightsTest, CheckAccess_NoAccess) {
-    MockUser user(4, "David", "david@example.com", "password000");
-    MockDocument document(4, "Unpublished Paper", "Unpublished content.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "none");
+TEST_F(AccessRightsTest, OutputMessageForAdminAccess) {
+    accessRights->assignAccess("admin");
 
-    EXPECT_FALSE(accessRights.checkAccess());
+    testing::internal::CaptureStdout();
+    accessRights->checkAccess();
+    std::string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_EQ(output, "You are an admin, you can read, write, and perform administrative actions.\n");
 }
 
-TEST(AccessRightsTest, AssignAccess_ChangeAccessLevel) {
-    MockUser user(5, "Eve", "eve@example.com", "password111");
-    MockDocument document(5, "Final Version", "Final content.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "read");
+TEST_F(AccessRightsTest, OutputMessageForWriterAccess) {
+    accessRights->assignAccess("write");
 
-    accessRights.assignAccess("write");
-
-    EXPECT_EQ(accessRights.getAccessLevel(), "write");
+    testing::internal::CaptureStdout();
+    accessRights->checkAccess();
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "You are a writer, you can read and write.\n");
 }
 
-TEST(AccessRightsTest, GetAccessLevel) {
-    MockUser user(6, "Frank", "frank@example.com", "password222");
-    MockDocument document(6, "Meeting Notes", "Notes from the meeting.", "2024-11-02");
-    AccessRights accessRights(&user, &document, "admin");
+TEST_F(AccessRightsTest, OutputMessageForReaderAccess) {
+    accessRights->assignAccess("read");
+    testing::internal::CaptureStdout();
+    accessRights->checkAccess();
+    std::string output = testing::internal::GetCapturedStdout();
 
-    EXPECT_EQ(accessRights.getAccessLevel(), "admin");
+    EXPECT_EQ(output, "You are a reader, you can only read.\n");
+}
+
+TEST_F(AccessRightsTest, OutputMessageForAccessDenied) {
+    accessRights->assignAccess("no_access"); 
+    testing::internal::CaptureStdout();
+    bool result = accessRights->checkAccess();     std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_FALSE(result);     EXPECT_EQ(output, "Access denied: you have no permissions.\n"); 
 }

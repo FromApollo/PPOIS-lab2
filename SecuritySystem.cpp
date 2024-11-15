@@ -1,5 +1,5 @@
 #include "SecuritySystem.h"
-#include <iostream>
+#include "User.h"
 
 void SecuritySystem::addUser(User* user, const std::string& password) {
     passwords[user] = password;
@@ -21,19 +21,13 @@ void SecuritySystem::changePassword(User* user, const std::string& newPassword) 
     }
 }
 
-void SecuritySystem::setAccessRights(User* user, Document* document, const std::string& rights) {
-    accessRights[user][document] = rights;
-    std::cout << "Access rights for user " << user->getName() << " on document " << document->getTitle() << " set to "
-        << rights << ".\n";
-}
-
-std::string SecuritySystem::getAccessRights(User* user, Document* document) const {
-    auto userRights = accessRights.find(user);
-    if (userRights != accessRights.end()) {
-        auto docRights = userRights->second.find(document);
-        if (docRights != userRights->second.end()) {
-            return docRights->second;
-        }
+bool SecuritySystem::login(User* user, const std::string& enteredPassword) const {
+    if (checkPassword(user, enteredPassword)) {
+        std::cout << "User " << user->getName() << " logged in successfully.\n";
+        return true;
     }
-    return "No access rights.";
+    else {
+        std::cout << "Incorrect password for user " << user->getName() << ".\n";
+        return false;
+    }
 }

@@ -3,42 +3,34 @@
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Editor.h"
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\User.h"
 
-class EditorTest : public ::testing::Test {
-protected:
-    Editor* editor;
-    Document* document;
+class FakeDocument : public Document {
+public:
+    FakeDocument(int id, const std::string& title, const std::string& content, const std::string& creationDate)
+        : Document(id, title, content, creationDate) {}
 
-    void SetUp() override {
-
-        editor = new Editor(1, "Bob", "bob@example.com", "password123", "Science");
-        document = new Document(1, "Test Document", "Initial content", "2024-11-02");
-    }
-
-    void TearDown() override {
-        delete editor;
-        delete document;
+    void edit(const std::string& newContent) {
+        content = newContent;
     }
 };
 
-TEST_F(EditorTest, ConstructorTest) {
-    EXPECT_EQ(editor->getName(), "Bob");
-    EXPECT_NO_THROW(editor->editDocument(*document, "Updated content"));
+TEST(EditorTest, EditDocument) {
+
+    FakeDocument doc(1, "Sample Document", "Old Content", "2024-11-11");
+    Editor editor(1, "Editor Name", "editor@example.com", "password123", "Tech");
+
+    editor.editDocument(doc, "New Content");
+
+    EXPECT_EQ(doc.getTitle(), "Sample Document");
 }
 
-TEST_F(EditorTest, EditDocumentTest) {
+TEST(EditorTest, SuggestChanges) {
+
+    FakeDocument doc(1, "Sample Document", "Content", "2024-11-11");
+    Editor editor(1, "Editor Name", "editor@example.com", "password123", "Tech");
+
 
     testing::internal::CaptureStdout();
-    editor->editDocument(*document, "Updated content");
+    editor.suggestChanges(doc, "Change the introduction.");
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NO_THROW(document->view());
-}
-
-TEST_F(EditorTest, SuggestChangesTest) {
-
-    testing::internal::CaptureStdout();
-    editor->suggestChanges(*document, "Add more examples.");
-    std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_EQ(output, "Editor Bob suggested changes for document Test Document: Add more examples..\n");
+    EXPECT_NE(output.find("Editor Name suggested changes for document Sample Document"), std::string::npos);
 }

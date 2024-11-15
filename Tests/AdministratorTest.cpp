@@ -1,6 +1,8 @@
 #include "pch.h"
-#include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Administrator.h"
-#include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\User.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/Administrator.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/User.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/Document.h"
+#include "D:/BSUIR/3 semester/PPOIS/lab2/Project1/Project1/AccessRights.h"
 
 class MockUser : public User {
 public:
@@ -8,43 +10,48 @@ public:
         : User(id, name, email, password) {}
 };
 
+class MockDocument : public Document {
+public:
+    MockDocument(int id, const std::string& title, const std::string& content, const std::string& creationDate)
+        : Document(id, title, content, creationDate) {}
+};
+
 class AdministratorTest : public ::testing::Test {
 protected:
     Administrator* admin;
     MockUser* user;
+    MockDocument* document;
+    AccessRights* accessRights;
 
     void SetUp() override {
         admin = new Administrator(1, "Admin", "admin@example.com", "admin123", 5);
-        user = new MockUser(2, "User", "user@example.com", "user123");
+        user = new MockUser(2, "Jane Smith", "jane@example.com", "password456");
+        document = new MockDocument(2, "User Document", "User document content.", "2024-01-01");
+        accessRights = new AccessRights(user, document, "read");
     }
 
     void TearDown() override {
-        delete admin;
+        delete accessRights;
+        delete document;
         delete user;
+        delete admin;
     }
 };
 
-TEST_F(AdministratorTest, ConstructorTest) {
-    EXPECT_EQ(admin->getName(), "Admin");
+TEST_F(AdministratorTest, ChangeUserPermissionsSuccessfully) {
+    std::string newAccessLevel = "write";
+    EXPECT_NO_THROW(admin->changeUserPermissions(*accessRights, newAccessLevel));
+    EXPECT_EQ(accessRights->getAccessLevel(), newAccessLevel);
 }
 
-TEST_F(AdministratorTest, AddUserTest) {
-    testing::internal::CaptureStdout();
-    admin->addUser(*user);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "User User has been added by administrator Admin.\n");
+TEST_F(AdministratorTest, ChangeUserPermissionsWithInvalidLevel) {
+    std::string newAccessLevel = "";
+    EXPECT_NO_THROW(admin->changeUserPermissions(*accessRights, newAccessLevel));
+    EXPECT_EQ(accessRights->getAccessLevel(), newAccessLevel);
 }
 
-TEST_F(AdministratorTest, DeleteUserTest) {
-    testing::internal::CaptureStdout();
-    admin->deleteUser(*user);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "User User has been deleted by administrator Admin.\n");
-}
-
-TEST_F(AdministratorTest, ChangeUserPermissionsTest) {
-    testing::internal::CaptureStdout();
-    admin->changeUserPermissions(*user, 3);
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output, "Administrator Admin changed permissions for user User to level 3.\n");
+TEST_F(AdministratorTest, CheckUserNameAfterChange) {
+    std::string newAccessLevel = "write";
+    admin->changeUserPermissions(*accessRights, newAccessLevel);
+    EXPECT_EQ(accessRights->getUser()->getName(), "Jane Smith");
 }

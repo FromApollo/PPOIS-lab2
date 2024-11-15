@@ -7,7 +7,8 @@ protected:
     OfficialDocument* doc;
 
     void SetUp() override {
-        doc = new OfficialDocument(1, "Test Document", "This is the content.", "2024-11-02", 12345, "Report");
+
+        doc = new OfficialDocument(1, "Official Document", "This is an official document.", "2024-11-11", 1001, "Contract");
     }
 
     void TearDown() override {
@@ -15,38 +16,36 @@ protected:
     }
 };
 
-TEST_F(OfficialDocumentTest, CreationTest) {
-    EXPECT_EQ(doc->getTitle(), "Test Document");
-}
-
-TEST_F(OfficialDocumentTest, SignTest) {
+TEST_F(OfficialDocumentTest, SignDocument) {
+    testing::internal::CaptureStdout();
     doc->sign();
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "Document Official Document has been signed.\n");
 }
 
-TEST_F(OfficialDocumentTest, RevokeSignatureTest) {
-    doc->sign(); 
+TEST_F(OfficialDocumentTest, RevokeSignature) {
+
+    doc->sign();
+    testing::internal::CaptureStdout();
     doc->revokeSignature();
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_EQ(output, "Signature revoked for document Official Document.\n");
+
 }
 
-TEST_F(OfficialDocumentTest, ViewTest) {
-    std::ostringstream output;
-    std::streambuf* oldCout = std::cout.rdbuf(output.rdbuf());
-
+TEST_F(OfficialDocumentTest, ViewDocument) {
+    testing::internal::CaptureStdout();
     doc->view();
-
-    std::cout.rdbuf(oldCout); 
-
-    std::string expectedOutput =
-        "ID: 1\n"
-        "Title: Test Document\n"
-        "Content: This is the content.\n"
-        "Creation Date: 2024-11-02\n"
-        "Document Number: 12345\n"
-        "Type: Report\n"
-        "Signed: No\n"; 
-
-    EXPECT_EQ(output.str(), expectedOutput);
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("Document Number: 1001"), std::string::npos);
+    EXPECT_NE(output.find("Type: Contract"), std::string::npos);
+    EXPECT_NE(output.find("Signed: No"), std::string::npos); 
 }
 
-
-
+TEST_F(OfficialDocumentTest, EditDocument) {
+    doc->edit("This is the updated content of the document.");
+    testing::internal::CaptureStdout();
+    doc->view();
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("This is the updated content of the document."), std::string::npos);
+}

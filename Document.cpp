@@ -14,9 +14,6 @@ void Document::edit(const std::string& newContent) {
     std::cout << "Document content updated.\n";
 }
 
-void Document::remove() {
-    std::cout << "Document '" << title << "' removed.\n";
-}
 
 std::string Document::getTitle() const {
     return title;

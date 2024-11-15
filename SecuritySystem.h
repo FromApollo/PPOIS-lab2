@@ -5,6 +5,7 @@
 #include "Document.h"
 #include <map>
 #include <string>
+#include <iostream>
 
 class SecuritySystem {
 private:
@@ -18,9 +19,8 @@ public:
 
     void changePassword(User* user, const std::string& newPassword);
 
-    void setAccessRights(User* user, Document* document, const std::string& rights);
 
-    std::string getAccessRights(User* user, Document* document) const;
+    bool login(User* user, const std::string& enteredPassword) const;
 };
 
 #endif 

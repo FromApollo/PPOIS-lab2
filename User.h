@@ -15,11 +15,9 @@ public:
 
     virtual ~User() = default;
 
-    bool login(const std::string& enteredPassword) const;
-
-    void logout() const;
-
     std::string getName() const;
+
+    void displayInfo() const;
 };
 
 #endif 

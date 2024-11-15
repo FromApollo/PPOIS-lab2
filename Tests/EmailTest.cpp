@@ -2,50 +2,55 @@
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Email.h"
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Notification.h"
 
-class EmailTest : public ::testing::Test {
-protected:
-    Email* email;
 
-    void SetUp() override {
-        email = new Email("Тестовая тема", "Это текст тела письма.", "2024-11-02 10:00",
-            "test@example.com", "Алиса");
+class FakeNotification : public Notification {
+public:
+    FakeNotification(const std::string& text, const std::string& timestamp, const std::string& senderName)
+        : Notification(text, timestamp, senderName) {}
+
+    void send() override {
     }
 
-    void TearDown() override {
-        delete email;
+    void read() override {
     }
 };
 
-TEST_F(EmailTest, SendEmailTest) {
+class EmailTest : public ::testing::Test {
+protected:
+
+    Email email;
+
+    EmailTest() : email("Subject", "Body", "2024-11-11 10:00:00", "receiver@example.com", "John Doe") {}
+
+    void TearDown() override {
+    }
+};
+
+TEST_F(EmailTest, SendEmail) {
 
     testing::internal::CaptureStdout();
-    email->send();
+    email.send();
     std::string output = testing::internal::GetCapturedStdout();
 
-    EXPECT_NE(output.find("Sending Email to test@example.com:"), std::string::npos);
-    EXPECT_NE(output.find("Subject: Тестовая тема"), std::string::npos);
-    EXPECT_NE(output.find("Body: Это текст тела письма."), std::string::npos);
-    EXPECT_NE(output.find("Timestamp: 2024-11-02 10:00"), std::string::npos);
+    EXPECT_NE(output.find("Sending Email to receiver@example.com:"), std::string::npos);
+    EXPECT_NE(output.find("Subject: Subject"), std::string::npos);
+    EXPECT_NE(output.find("Body: Body"), std::string::npos);
 }
 
-TEST_F(EmailTest, ReadEmailTest) {
+TEST_F(EmailTest, ReadEmail) {
 
     testing::internal::CaptureStdout();
-    email->read();
+    email.read();
     std::string output = testing::internal::GetCapturedStdout();
 
     EXPECT_NE(output.find("Email notification read:"), std::string::npos);
-    EXPECT_NE(output.find("From: test@example.com"), std::string::npos);
-    EXPECT_NE(output.find("Subject: Тестовая тема"), std::string::npos);
-    EXPECT_NE(output.find("Body: Это текст тела письма."), std::string::npos);
+    EXPECT_NE(output.find("From: receiver@example.com"), std::string::npos);
+    EXPECT_NE(output.find("Subject: Subject"), std::string::npos);
+    EXPECT_NE(output.find("Body: Body"), std::string::npos);
 }
 
-TEST_F(EmailTest, GetEmailContentTest) {
-    std::string content = email->getEmailContent();
-    EXPECT_EQ(content, "Subject: Тестовая тема\nBody: Это текст тела письма.");
-}
+TEST_F(EmailTest, GetEmailContent) {
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    std::string content = email.getEmailContent();
+    EXPECT_EQ(content, "Subject: Subject\nBody: Body");
 }

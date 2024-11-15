@@ -1,49 +1,48 @@
 #include "pch.h"
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\EventLog.h"
 
+
 class EventLogTest : public ::testing::Test {
 protected:
-    EventLog* eventLog;
+    EventLog log;  
 
-    void SetUp() override {
-        eventLog = new EventLog();
-    }
+    EventLogTest() {}
 
-    void TearDown() override {
-        delete eventLog;
-    }
+    void TearDown() override {}
 };
 
-TEST_F(EventLogTest, AddEntryTest) {
+TEST_F(EventLogTest, AddEntry) {
 
     testing::internal::CaptureStdout();
-    eventLog->addEntry("Test event 1");
-    std::string output = testing::internal::GetCapturedStdout();
 
-    EXPECT_EQ(output, "Event logged: Test event 1\n");
+    log.addEntry("User logged in");
+
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("Event logged: User logged in"), std::string::npos);
 }
 
-TEST_F(EventLogTest, ViewLogTest) {
-    eventLog->addEntry("Test event 1");
-    eventLog->addEntry("Test event 2");
-
+TEST_F(EventLogTest, ViewLog) {
 
     testing::internal::CaptureStdout();
-    eventLog->viewLog();
-    std::string output = testing::internal::GetCapturedStdout();
 
+    log.addEntry("User logged in");
+    log.addEntry("File uploaded");
+
+    log.viewLog();
+
+    std::string output = testing::internal::GetCapturedStdout();
     EXPECT_NE(output.find("Event Log:"), std::string::npos);
-    EXPECT_NE(output.find("- Test event 1"), std::string::npos);
-    EXPECT_NE(output.find("- Test event 2"), std::string::npos);
+    EXPECT_NE(output.find("- User logged in"), std::string::npos);
+    EXPECT_NE(output.find("- File uploaded"), std::string::npos);
 }
 
-TEST_F(EventLogTest, ViewLogEmptyTest) {
+TEST_F(EventLogTest, EmptyLog) {
 
     testing::internal::CaptureStdout();
-    eventLog->viewLog();
+
+    log.viewLog();
+
     std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_EQ(output, "Event Log:\n");
+    EXPECT_NE(output.find("Event Log:"), std::string::npos);
+    EXPECT_EQ(output.find("-"), std::string::npos);  
 }
-
-

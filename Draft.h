@@ -18,6 +18,8 @@ public:
     void submitForReview();
 
     void view() const;
+
+    int getVersion() const;
 };
 
 #endif 

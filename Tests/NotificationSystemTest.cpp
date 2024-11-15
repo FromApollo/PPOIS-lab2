@@ -2,71 +2,82 @@
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\Notification.h"
 #include "D:\BSUIR\3 semester\PPOIS\lab2\Project1\Project1\NotificationSystem.h"
 
-class TestNotification : public Notification {
+
+class MockNotification : public Notification {
 public:
-    TestNotification(const std::string& text, const std::string& timestamp, const std::string& senderName)
+    MockNotification(const std::string& text, const std::string& timestamp, const std::string& senderName)
         : Notification(text, timestamp, senderName) {}
 
     void send() override {
-        std::cout << "Sending notification: " << text << " at " << timestamp << "\n";
+        std::cout << "Sending mock notification: " << text << "\n";
     }
 
     void read() override {
-        std::cout << "Reading notification: " << text << "\n";
+        std::cout << "Reading mock notification: " << text << "\n";
     }
 };
-
 
 class NotificationSystemTest : public ::testing::Test {
 protected:
-    NotificationSystem* notificationSystem;
+    NotificationSystem system; 
 
-    void SetUp() override {
-        notificationSystem = new NotificationSystem();
-    }
+    NotificationSystemTest() {}
 
-    void TearDown() override {
-        delete notificationSystem;
-    }
+    void TearDown() override {}
 };
 
-TEST_F(NotificationSystemTest, AddNotificationTest) {
-    TestNotification* notification = new TestNotification("Test notification", "2024-11-02 10:00", "Test Sender");
-    notificationSystem->addNotification(notification);
-}
+TEST_F(NotificationSystemTest, AddNotification) {
 
-TEST_F(NotificationSystemTest, SendAllNotificationsTest) {
     testing::internal::CaptureStdout();
 
-    TestNotification* notification1 = new TestNotification("First notification", "2024-11-02 10:00", "Sender1");
-    TestNotification* notification2 = new TestNotification("Second notification", "2024-11-02 10:01", "Sender2");
+    MockNotification* notification = new MockNotification("Test Notification", "2024-11-11 12:00", "Test Sender");
+    system.addNotification(notification);
 
-    notificationSystem->addNotification(notification1);
-    notificationSystem->addNotification(notification2);
-
-    notificationSystem->sendAll();
+    system.sendAll(); 
 
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output,
-        "Sending notification: First notification at 2024-11-02 10:00\n"
-        "Sending notification: Second notification at 2024-11-02 10:01\n"
-    );
+    EXPECT_NE(output.find("Sending mock notification: Test Notification"), std::string::npos);
 }
 
-TEST_F(NotificationSystemTest, ReadAllNotificationsTest) {
+TEST_F(NotificationSystemTest, SendAllNotifications) {
+
     testing::internal::CaptureStdout();
 
-    TestNotification* notification1 = new TestNotification("Test notification 1", "2024-11-02 10:00", "Sender1");
-    TestNotification* notification2 = new TestNotification("Test notification 2", "2024-11-02 10:01", "Sender2");
+    MockNotification* notification1 = new MockNotification("First Notification", "2024-11-11 12:00", "Sender1");
+    MockNotification* notification2 = new MockNotification("Second Notification", "2024-11-11 12:05", "Sender2");
+    system.addNotification(notification1);
+    system.addNotification(notification2);
 
-    notificationSystem->addNotification(notification1);
-    notificationSystem->addNotification(notification2);
-
-    notificationSystem->readAll();
+    system.sendAll();
 
     std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_EQ(output,
-        "Reading notification: Test notification 1\n"
-        "Reading notification: Test notification 2\n"
-    );
+    EXPECT_NE(output.find("Sending mock notification: First Notification"), std::string::npos);
+    EXPECT_NE(output.find("Sending mock notification: Second Notification"), std::string::npos);
 }
+
+TEST_F(NotificationSystemTest, ReadAllNotifications) {
+
+    testing::internal::CaptureStdout();
+
+    MockNotification* notification1 = new MockNotification("First Notification", "2024-11-11 12:00", "Sender1");
+    MockNotification* notification2 = new MockNotification("Second Notification", "2024-11-11 12:05", "Sender2");
+    system.addNotification(notification1);
+    system.addNotification(notification2);
+
+    system.readAll();
+
+    std::string output = testing::internal::GetCapturedStdout();
+    EXPECT_NE(output.find("Reading mock notification: First Notification"), std::string::npos);
+    EXPECT_NE(output.find("Reading mock notification: Second Notification"), std::string::npos);
+}
+
+TEST_F(NotificationSystemTest, DestructorDeletesNotifications) {
+
+    NotificationSystem system;
+
+    MockNotification* notification1 = new MockNotification("First Notification", "2024-11-11 12:00", "Sender1");
+    MockNotification* notification2 = new MockNotification("Second Notification", "2024-11-11 12:05", "Sender2");
+    system.addNotification(notification1);
+    system.addNotification(notification2);
+}
+

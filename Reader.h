@@ -13,6 +13,8 @@ public:
 
     void addToBookmarks(const Document& document);
 
+    void viewBookmarks() const;
+
 private:
     std::vector<std::string> bookmarks;
 };

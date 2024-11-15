@@ -19,3 +19,7 @@ void Draft::view() const {
         << "\nCreation Date: " << creationDate << "\nVersion: " << version
         << "\nEditor: " << editor << std::endl;
 }
+
+int Draft::getVersion() const {
+    return version;
+}

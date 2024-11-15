@@ -3,55 +3,33 @@
 
 class DocumentTest : public ::testing::Test {
 protected:
-    Document* doc;
+    Document* document;
 
     void SetUp() override {
-
-        doc = new Document(1, "Test Title", "This is the content.", "2024-11-02");
+        document = new Document(1, "Test Title", "This is test content.", "2024-01-01");
     }
 
     void TearDown() override {
-        delete doc;
+        delete document;
     }
 };
 
-TEST_F(DocumentTest, ConstructorTest) {
-    EXPECT_EQ(doc->getTitle(), "Test Title");
-    EXPECT_NO_THROW(doc->view());  
+TEST_F(DocumentTest, ConstructorInitializesFieldsCorrectly) {
+    EXPECT_EQ(document->getTitle(), "Test Title");
 }
 
-TEST_F(DocumentTest, GetTitleTest) {
-    EXPECT_EQ(doc->getTitle(), "Test Title");
+TEST_F(DocumentTest, ViewDisplaysCorrectInformation) {
+    testing::internal::CaptureStdout();     document->view();     std::string output = testing::internal::GetCapturedStdout(); 
+    EXPECT_EQ(output, "ID: 1\nTitle: Test Title\nContent: This is test content.\nCreation Date: 2024-01-01\n");
 }
 
-TEST_F(DocumentTest, EditTest) {
-    std::string newContent = "Updated content.";
-
-    testing::internal::CaptureStdout();
-    doc->edit(newContent);
-    std::string output = testing::internal::GetCapturedStdout();
-
+TEST_F(DocumentTest, EditUpdatesContentCorrectly) {
+    document->edit("Updated content.");     
+    testing::internal::CaptureStdout();     document->edit("New content again."); 
+    std::string output = testing::internal::GetCapturedStdout(); 
     EXPECT_EQ(output, "Document content updated.\n");
-    EXPECT_NO_THROW(doc->view());  
 }
 
-TEST_F(DocumentTest, RemoveTest) {
-
-    testing::internal::CaptureStdout();
-    doc->remove();
-    std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_EQ(output, "Document 'Test Title' removed.\n");
-}
-
-TEST_F(DocumentTest, ViewTest) {
-
-    testing::internal::CaptureStdout();
-    doc->view();
-    std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_NE(output.find("ID: 1"), std::string::npos);
-    EXPECT_NE(output.find("Title: Test Title"), std::string::npos);
-    EXPECT_NE(output.find("Content: This is the content."), std::string::npos);
-    EXPECT_NE(output.find("Creation Date: 2024-11-02"), std::string::npos);
+TEST_F(DocumentTest, GetTitleReturnsCorrectTitle) {
+    EXPECT_EQ(document->getTitle(), "Test Title"); 
 }

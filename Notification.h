@@ -7,20 +7,7 @@ class Notification {
 protected:
     std::string text;
     std::string timestamp;
-
-
-    class Sender {
-    private:
-        std::string name;
-
-    public:
-        Sender(const std::string& name);
-
-        std::string getName() const;
-    };
-
-    Sender sender;
-
+    std::string senderName;
 public:
     Notification(const std::string& text, const std::string& timestamp, const std::string& senderName);
 
@@ -35,4 +22,4 @@ public:
     std::string getSenderName() const;
 };
 
-#endif 
+#endif

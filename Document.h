@@ -21,7 +21,6 @@ public:
 
     void edit(const std::string& newContent);
 
-    void remove();
 };
 
 #endif 

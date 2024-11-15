@@ -6,7 +6,7 @@ protected:
     User* user;
 
     void SetUp() override {
-        user = new User(1, "Alice", "alice@example.com", "password123");
+        user = new User(1, "John Doe", "john@example.com", "password123");
     }
 
     void TearDown() override {
@@ -14,32 +14,27 @@ protected:
     }
 };
 
-TEST_F(UserTest, LoginWithCorrectPassword) {
-    testing::internal::CaptureStdout();
-    bool result = user->login("password123");
-    std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_TRUE(result);
-    EXPECT_EQ(output, "User Alice logged in successfully.\n");
+TEST_F(UserTest, ConstructorTest) {
+    EXPECT_EQ(user->getName(), "John Doe");
 }
 
-TEST_F(UserTest, LoginWithIncorrectPassword) {
-    testing::internal::CaptureStdout();
-    bool result = user->login("wrongpassword");
-    std::string output = testing::internal::GetCapturedStdout();
-
-    EXPECT_FALSE(result);
-    EXPECT_EQ(output, "Incorrect password for user Alice.\n");
+TEST_F(UserTest, GetNameTest) {
+    EXPECT_EQ(user->getName(), "John Doe");
 }
 
-TEST_F(UserTest, Logout) {
-    testing::internal::CaptureStdout();
-    user->logout();
-    std::string output = testing::internal::GetCapturedStdout();
+TEST_F(UserTest, DisplayInfoTest) {
+    std::ostringstream output;
+    std::streambuf* originalCoutBuffer = std::cout.rdbuf(output.rdbuf()); 
 
-    EXPECT_EQ(output, "User Alice logged out.\n");
+    user->displayInfo();
+
+    std::cout.rdbuf(originalCoutBuffer); 
+
+    std::string expectedOutput = "User ID: 1\nName: John Doe\nEmail: john@example.com\n";
+    EXPECT_EQ(output.str(), expectedOutput);
 }
 
-TEST_F(UserTest, GetName) {
-    EXPECT_EQ(user->getName(), "Alice");
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
